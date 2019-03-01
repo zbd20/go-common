@@ -44,8 +44,12 @@ type Config struct {
 	// ExcludePrefix exclude url prefix will skip jwt validator
 	ExcludePrefix []string
 	// ContextKey Context key to store user information from the token into context.
-	// Optional. Default value "user".
+	// Optional. Default value "".
 	ContextKey string
+
+	// HeaderKey Header key to store user information from the token into Header.
+	// Optional. Default value "".
+	HeaderKey string
 
 	// CustomValidator custom validator suggestion flow：
 	// 1. check exlude url, and exclude url prefix
@@ -64,7 +68,7 @@ func New(config *Config) *Provider {
 	if config.Name == "" {
 		config.Name = "Authorization"
 	}
-	if config.ContextKey == "" {
+	if config.ContextKey == "" && config.HeaderKey == "" {
 		config.ContextKey = config.Name
 	}
 	if config.ErrorHandler == nil {
@@ -94,7 +98,12 @@ func New(config *Config) *Provider {
 // GeneratorToken generate token by custom value and token ttl
 func (t *Provider) GeneratorToken(customValue string, ttl time.Duration) (string, error) {
 	claims := make(gojwt.MapClaims)
-	claims[t.Config.ContextKey] = customValue
+	if t.Config.HeaderKey != "" {
+		claims[t.Config.HeaderKey] = customValue
+	} else {
+		claims[t.Config.ContextKey] = customValue
+	}
+
 	claims["exp"] = time.Now().Add(ttl).Unix()
 	token := gojwt.NewWithClaims(t.Config.SigningMethod, claims)
 	// sign token and get the complete encoded token as a string
@@ -103,11 +112,18 @@ func (t *Provider) GeneratorToken(customValue string, ttl time.Duration) (string
 
 // GetCustomValue return custom value in token, or returns error
 func (t *Provider) GetCustomValue(req *restful.Request) (string, error) {
-	val := req.Attribute(t.Config.ContextKey)
-	if val == nil {
+	content := ""
+	if t.Config.HeaderKey != "" {
+		content = req.HeaderParameter(t.Config.HeaderKey)
+	} else {
+		content = req.Attribute(t.Config.ContextKey).(string)
+	}
+
+	if content == "" {
 		return "", fmt.Errorf("token value not exist")
 	}
-	return val.(string), nil
+
+	return content, nil
 }
 
 // defaultOnError default error handler
@@ -203,9 +219,15 @@ func defaultCheckJWT(config *Config, req *restful.Request) error {
 	if !parsedToken.Valid {
 		return fmt.Errorf("Token is invalid")
 	}
-	// save custom value to context
+
 	claims := parsedToken.Claims.(gojwt.MapClaims)
-	req.SetAttribute(config.ContextKey, claims[config.ContextKey])
+	if config.HeaderKey != "" {
+		// save custom value to Header
+		req.Request.Header.Add(config.HeaderKey, claims[config.HeaderKey].(string))
+	} else {
+		// save custom value to context
+		req.SetAttribute(config.ContextKey, claims[config.ContextKey])
+	}
 
 	return nil
 }
