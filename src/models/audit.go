@@ -37,6 +37,10 @@ const (
 	OperatingTypeDelete
 	OperatingTypeLogin
 	OperatingTypeLogout
+	OperatingTypeScale
+	OperatingTypeRollback
+	OperatingTypeBuild
+	OperatingTypeRestart
 )
 
 const (
@@ -48,6 +52,15 @@ const (
 	OperatingResourceGroup
 	OperatingResourceRoute
 	OperatingResourceProme
+	OperatingResourceApp
+	OperatingResourceSvc
+	OperatingResourceCronJob
+	OperatingResourceConfigMap
+	OperatingResourceCluster
+	OperatingResourceNamespace
+	OperatingResourceHpa
+	OperatingResourceNode
+	OperatingResourceCanary
 )
 
 type OperationAudit struct {
@@ -86,6 +99,24 @@ func (o *OperationAudit) GetOperationResource() string {
 		return "用户组"
 	case OperatingResourceProme:
 		return "Prometheus 采集器"
+	case OperatingResourceApp:
+		return "应用"
+	case OperatingResourceSvc:
+		return "服务"
+	case OperatingResourceCronJob:
+		return "定时任务"
+	case OperatingResourceConfigMap:
+		return "配置"
+	case OperatingResourceCluster:
+		return "集群"
+	case OperatingResourceNamespace:
+		return "空间"
+	case OperatingResourceHpa:
+		return "自动扩缩"
+	case OperatingResourceNode:
+		return "节点"
+	case OperatingResourceCanary:
+		return "流量管理"
 	}
 	return ""
 }
@@ -102,6 +133,14 @@ func (o *OperationAudit) GetOperationType() string {
 		return "登录"
 	case OperatingTypeLogout:
 		return "登出"
+	case OperatingTypeScale:
+		return "扩缩"
+	case OperatingTypeRollback:
+		return "回滚"
+	case OperatingTypeBuild:
+		return "构建"
+	case OperatingTypeRestart:
+		return "重启"
 	}
 	return ""
 }
