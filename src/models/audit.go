@@ -61,6 +61,9 @@ const (
 	OperatingResourceHpa
 	OperatingResourceNode
 	OperatingResourceCanary
+	OperatingResourceTemplate
+	OperatingResourceApplication
+	OperatingResourceStep
 )
 
 type OperationAudit struct {
@@ -117,6 +120,12 @@ func (o *OperationAudit) GetOperationResource() string {
 		return "节点"
 	case OperatingResourceCanary:
 		return "流量管理"
+	case OperatingResourceTemplate:
+		return "上线审批模板"
+	case OperatingResourceApplication:
+		return "上线审批申请"
+	case OperatingResourceStep:
+		return "上线审批流程"
 	}
 	return ""
 }
