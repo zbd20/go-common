@@ -10,20 +10,20 @@ import (
 	"github.com/iyacontrol/go-common/src/models"
 )
 
-type auditService struct {
+type AuditService struct {
 	db *gorm.DB
 }
 
-func newAuditService(db *gorm.DB) *auditService {
-	return &auditService{db}
+func NewAuditService(db *gorm.DB) *AuditService {
+	return &AuditService{db}
 }
 
-func (as *auditService) Create(oa models.OperationAudit) error {
+func (as *AuditService) Create(oa models.OperationAudit) error {
 	oa.CreateTime = time.Now()
 	return as.db.Create(&oa).Error
 }
 
-func (as *auditService) List(page models.Page) (int64, []models.OperationAudit, error) {
+func (as *AuditService) List(page models.Page) (int64, []models.OperationAudit, error) {
 	var oa []models.OperationAudit
 	var count int64
 
@@ -41,7 +41,7 @@ func (as *auditService) List(page models.Page) (int64, []models.OperationAudit, 
 	return count, oa, nil
 }
 
-func (as *auditService) FindByShareID(sid string, page models.Page) (int64, []models.OperationAudit, error) {
+func (as *AuditService) FindByShareID(sid string, page models.Page) (int64, []models.OperationAudit, error) {
 	var oa []models.OperationAudit
 	var count int64
 	if result := as.db.Model(&models.OperationAudit{}).
